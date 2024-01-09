@@ -1,2 +1,2 @@
 # mud-translator
-Translate MUD profiles (JSON/XML) to YAML extended profiles
+Translate a MUD profile (JSON/XML) into a YAML extended profile.
