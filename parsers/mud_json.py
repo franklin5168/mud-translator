@@ -19,7 +19,8 @@ def parse_mud_file(input: str, output: str) -> None:
     with open(input, "r") as mud_file:
         data = json.load(mud_file)
 
-        
+        # TODO: remove unnecessary fields
+        # TODO: add missing fields (mac, ip, etc.)
 
         with open(output, "w") as yaml_file:
             yaml.dump(data, yaml_file, default_flow_style=False)
