@@ -9,7 +9,7 @@ import argparse
 import re
 import ipaddress
 # Custom modules
-from parsers.MudParser import MudParser
+from parsers.mud.MudParser import MudParser
 
 
 def mac_address_type(mac_address: str) -> str:

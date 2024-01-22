@@ -5,6 +5,7 @@ import importlib
 from argparse import Namespace
 from enum import Enum
 import yaml
+from parsers.protocols.Protocol import Protocol
 
 
 class MudParser:
@@ -23,7 +24,22 @@ class MudParser:
         Enumerate the different types of MUD profiles.
         """
         JSON = 1
-        XML = 2
+        XML  = 2
+
+    class L3(Enum):
+        """
+        Enumerate the different types of Layer 3 protocols.
+        """
+        IPv4 = "ipv4"
+        IPv6 = "ipv6"
+
+    class L4(Enum):
+        """
+        Enumerate the different types of Layer 4 protocols.
+        """
+        TCP  = "tcp"
+        UDP  = "udp"
+        ICMP = "icmp"
 
 
     @classmethod
@@ -49,7 +65,7 @@ class MudParser:
         else:
             raise ValueError("Unrecognized MUD file format")
         
-        module = importlib.import_module(f"parsers.{parser}")
+        module = importlib.import_module(f"parsers.mud.{parser}")
         cls = getattr(module, parser)
         return cls(args)
     
@@ -127,7 +143,10 @@ class MudParser:
         for i in range(len(to_device_acls)):
             acls.append(to_device_acls[i]["name"])
 
-        ## Parse ACLs from ACL container
+        # Initialize YAML single policies field
+        yaml_data["single-policies"] = {}
+
+        # Parse ACLs from ACL container
         for acl in acl_data["acl"]:
 
             # ACLs not referenced in MUD container: skip
@@ -137,9 +156,28 @@ class MudParser:
             # ACLs referenced in MUD container:
             # Parse and add entries to YAML data
             for ace in acl["aces"]["ace"]:
-                pass
+                matches = ace["matches"]
+                policy = {"protocols": {}}  # Policy for the YAML profile, will be populated by parsing
+                protocols = policy["protocols"]
 
-        yaml_data["single-policies"] = {}
+                # Layer 3 match
+                for protocol_name in self.L3:
+                    if protocol_name.value in matches:
+                        protocol = Protocol.init_protocol(protocol_name.value)
+                        protocol_matches = protocol.parse(matches[protocol_name.value])
+                        protocols[protocol.name] = protocol_matches
+                        break
+
+                # Layer 4 match
+                for protocol_name in self.L4:
+                    if protocol_name.value in matches:
+                        protocol = Protocol.init_protocol(protocol_name.value)
+                        protocol_matches = protocol.parse(matches[protocol_name.value])
+                        protocols[protocol.name] = protocol_matches
+                        break
+                
+                # Add policy to YAML data
+                yaml_data["single-policies"][ace["name"]] = policy
 
         # Write output YAML file
         self.write_output(yaml_data)

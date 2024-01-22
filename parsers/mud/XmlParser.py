@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from xml.dom import minidom
-from parsers.MudParser import MudParser
+from parsers.mud.MudParser import MudParser
 
 
 class XmlParser(MudParser):

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import json
-from parsers.MudParser import MudParser
+from parsers.mud.MudParser import MudParser
 
 
 class JsonParser(MudParser):
