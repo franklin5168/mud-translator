@@ -8,7 +8,9 @@ class ipv6(Protocol):
     IPv6 protocol parser.
     """
 
+    # Protocol name
     name = "ipv6"
+
 
     def parse(self, matches: dict) -> dict:
         """

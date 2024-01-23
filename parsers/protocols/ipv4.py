@@ -8,7 +8,9 @@ class ipv4(Protocol):
     IPv4 protocol parser.
     """
 
+    # Protocol name
     name = "ipv4"
+
 
     def parse(self, matches: dict) -> dict:
         """

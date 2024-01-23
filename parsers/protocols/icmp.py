@@ -8,7 +8,9 @@ class icmp(Protocol):
     ICMP protocol parser.
     """
 
+    # Protocol name
     name = "icmp"
+
 
     def parse(self, matches: dict) -> dict:
         """

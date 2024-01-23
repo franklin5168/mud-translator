@@ -9,6 +9,9 @@ class Protocol:
     Default Protocol parser.
     """
 
+    transport_protocols = ["tcp", "udp"]
+
+
     @classmethod
     def init_protocol(c, protocol_name: str) -> Protocol:
         """
@@ -16,18 +19,22 @@ class Protocol:
 
         :param protocol_name: name of the protocol
         """
-        module = importlib.import_module(f"parsers.protocols.{protocol_name}")
-        cls = getattr(module, protocol_name)
-        return cls()
+        if protocol_name in c.transport_protocols:
+            module = importlib.import_module(f"parsers.protocols.Transport")
+            cls = getattr(module, "Transport")
+        else:
+            module = importlib.import_module(f"parsers.protocols.{protocol_name}")    
+            cls = getattr(module, protocol_name)
+        return cls(protocol_name)
     
 
-    def __init__(self) -> None:
+    def __init__(self, protocol_name: str) -> None:
         """
         Constructor for the Protocol class.
 
         :param protocol_name: name of the protocol
         """
-        pass
+        self.name = protocol_name
     
 
     def parse(self, matches: dict) -> dict:
