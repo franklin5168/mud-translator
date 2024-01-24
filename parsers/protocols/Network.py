@@ -2,6 +2,7 @@
 
 import re
 import ipaddress
+from parsers.Direction import Direction
 from parsers.protocols.Protocol import Protocol
 
 
@@ -49,13 +50,15 @@ class Network(Protocol):
         return str(network_match)
 
 
-    def parse(self, matches: dict) -> dict:
+    def parse(self, matches: dict, direction: Direction, is_local_network: bool) -> dict:
         """
         Parse the protocol matches.
 
         :param matches: dict of protocol matches read from the MUD file
+        :param direction: direction of the traffic (FROM or TO)
+        :param is_local_network: whether the traffic is within the local network
         :return: dict of protocol matches for the YAML profile
-        :raises ValueError: if the protocol matches are invalid
+        :raises NotImplementedError: concrete protocol subclass must implement the parse method
         """
         # Initialize result dict
         proto_dict = {}
@@ -65,6 +68,13 @@ class Network(Protocol):
             net_match = matches.get(mud_field, None)
             if net_match is not None:
                 proto_dict[yaml_field] = self.parse_network(mud_field, net_match)
+        
+        # If local network, add corresponding address, depending on direction
+        if is_local_network:
+            if direction == Direction.FROM:
+                proto_dict["dst"] = "local"
+            elif direction == Direction.TO:
+                proto_dict["src"] = "local"
 
         return proto_dict
 

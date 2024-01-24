@@ -5,6 +5,7 @@ import importlib
 from argparse import Namespace
 from enum import Enum
 import yaml
+from parsers.Direction import Direction
 from parsers.protocols.Protocol import Protocol
 
 
@@ -18,6 +19,13 @@ class MudParser:
     ACL  = "ietf-access-control-list:access-lists"
     FROM = "from-device-policy"
     TO   = "to-device-policy"
+    supported_protocols = [
+        "ipv4",
+        "ipv6",
+        "tcp",
+        "udp",
+        "icmp"
+    ]
 
     class Format(Enum):
         """
@@ -25,21 +33,6 @@ class MudParser:
         """
         JSON = 1
         XML  = 2
-
-    class L3(Enum):
-        """
-        Enumerate the different types of Layer 3 protocols.
-        """
-        IPv4 = "ipv4"
-        IPv6 = "ipv6"
-
-    class L4(Enum):
-        """
-        Enumerate the different types of Layer 4 protocols.
-        """
-        TCP  = "tcp"
-        UDP  = "udp"
-        ICMP = "icmp"
 
 
     @classmethod
@@ -133,15 +126,15 @@ class MudParser:
             yaml_data["device-info"]["network"] = self.network
 
         ## Parse ACL names from MUD container
-        acls = []
+        acls = {}
         # From device
         from_device_acls = mud_data[self.FROM]["access-lists"]["access-list"]
         for i in range(len(from_device_acls)):
-            acls.append(from_device_acls[i]["name"])
+            acls[from_device_acls[i]["name"]] = Direction.FROM
         # To device
         to_device_acls = mud_data[self.TO]["access-lists"]["access-list"]
         for i in range(len(to_device_acls)):
-            acls.append(to_device_acls[i]["name"])
+            acls[to_device_acls[i]["name"]] = Direction.FROM
 
         # Initialize YAML single policies field
         yaml_data["single-policies"] = {}
@@ -150,31 +143,30 @@ class MudParser:
         for acl in acl_data["acl"]:
 
             # ACLs not referenced in MUD container: skip
-            if acl["name"] not in acls:
+            if acl["name"] not in acls.keys():
                 continue
 
             # ACLs referenced in MUD container:
             # Parse and add entries to YAML data
             for ace in acl["aces"]["ace"]:
+                direction = acls[acl["name"]]
                 matches = ace["matches"]
                 policy = {"protocols": {}}  # Policy for the YAML profile, will be populated by parsing
                 protocols = policy["protocols"]
 
-                # Layer 3 match
-                for protocol_name in self.L3:
-                    if protocol_name.value in matches:
-                        protocol = Protocol.init_protocol(protocol_name.value)
-                        protocol_matches = protocol.parse(matches[protocol_name.value])
-                        protocols[protocol.name] = protocol_matches
-                        break
+                # Local network source or destination IP address
+                is_local_network = bool(matches.get(self.MUD, {}).get("local-networks", None))
 
-                # Layer 4 match
-                for protocol_name in self.L4:
-                    if protocol_name.value in matches:
-                        protocol = Protocol.init_protocol(protocol_name.value)
-                        protocol_matches = protocol.parse(matches[protocol_name.value])
-                        protocols[protocol.name] = protocol_matches
-                        break
+                # TODO
+                # If TCP field direction-initiated is present and is "to-device"
+
+                # Parse protocol if supported
+                for protocol_name in self.supported_protocols:
+                    if protocol_name in matches:
+                        protocol = Protocol.init_protocol(protocol_name)
+                        protocol_matches = protocol.parse(matches[protocol_name], direction, is_local_network)
+                        if protocol_matches:
+                            protocols[protocol.name] = protocol_matches
                 
                 # Add policy to YAML data
                 yaml_data["single-policies"][ace["name"]] = policy

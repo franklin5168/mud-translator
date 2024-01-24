@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import importlib
+from parsers.Direction import Direction
 
 
 class Protocol:
@@ -47,11 +48,13 @@ class Protocol:
         self.name = protocol_name
     
 
-    def parse(self, matches: dict) -> dict:
+    def parse(self, matches: dict, direction: Direction, is_local_network: bool) -> dict:
         """
         Parse the protocol matches.
 
         :param matches: dict of protocol matches read from the MUD file
+        :param direction: direction of the traffic (FROM or TO)
+        :param is_local_network: whether the traffic is within the local network
         :return: dict of protocol matches for the YAML profile
         :raises NotImplementedError: concrete protocol subclass must implement the parse method
         """

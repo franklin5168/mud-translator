@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from parsers.Direction import Direction
 from parsers.protocols.Protocol import Protocol
 
 
@@ -48,13 +49,15 @@ class Transport(Protocol):
             return f"{self.operators[op]} {port}"
 
 
-    def parse(self, matches: dict) -> dict:
+    def parse(self, matches: dict, direction: Direction, is_local_network: bool) -> dict:
         """
         Parse the protocol matches.
 
         :param matches: dict of protocol matches read from the MUD file
+        :param direction: direction of the traffic (FROM or TO)
+        :param is_local_network: whether the traffic is within the local network
         :return: dict of protocol matches for the YAML profile
-        :raises ValueError: if the protocol matches are invalid
+        :raises NotImplementedError: concrete protocol subclass must implement the parse method
         """
         # Initialize result dict
         proto_dict = {}
@@ -70,6 +73,6 @@ class Transport(Protocol):
             proto_dict["dst-port"] = self.parse_port(dst_port_match)
 
         # TODO: direction-initiated
-
+        
         return proto_dict
 

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from parsers.protocols.Protocol import Protocol
+from parsers.Direction import Direction
 
 
 class icmp(Protocol):
@@ -50,12 +51,15 @@ class icmp(Protocol):
         return icmp_type
 
 
-    def parse(self, matches: dict) -> dict:
+    def parse(self, matches: dict, direction: Direction, is_local_network: bool) -> dict:
         """
         Parse the protocol matches.
 
         :param matches: dict of protocol matches read from the MUD file
+        :param direction: direction of the traffic (FROM or TO)
+        :param is_local_network: whether the traffic is within the local network
         :return: dict of protocol matches for the YAML profile
+        :raises NotImplementedError: concrete protocol subclass must implement the parse method
         """
         # Initialize result dict
         proto_dict = {}
