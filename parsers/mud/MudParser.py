@@ -134,7 +134,7 @@ class MudParser:
         # To device
         to_device_acls = mud_data[self.TO]["access-lists"]["access-list"]
         for i in range(len(to_device_acls)):
-            acls[to_device_acls[i]["name"]] = Direction.FROM
+            acls[to_device_acls[i]["name"]] = Direction.TO
 
         # Initialize YAML single policies field
         yaml_data["single-policies"] = {}
