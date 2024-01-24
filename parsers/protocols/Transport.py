@@ -8,6 +8,13 @@ class Transport(Protocol):
     Transport layer (TCP or UDP) protocol parser.
     """
 
+    # Supported fields
+    fields = [
+        "source-port",
+        "destination-port",
+        "direction-initiated"
+    ]
+
     # Supported operators on port numbers
     operators = {
         "lte": "<= ",  # less than or equal to
@@ -21,7 +28,6 @@ class Transport(Protocol):
         """
         Parse a protocol port match.
 
-        :param port_name: name of the port match (src-port or dst-port)
         :param port_match: dict of protocol port match
         :return: string of protocol port match for the YAML profile
         :raises ValueError: if the protocol port match is invalid

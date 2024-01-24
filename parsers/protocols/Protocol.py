@@ -9,7 +9,8 @@ class Protocol:
     Default Protocol parser.
     """
 
-    transport_protocols = ["tcp", "udp"]
+    layer_3_protocols = ["ipv4", "ipv6"]
+    layer_4_protocols = ["tcp", "udp"]
 
 
     @classmethod
@@ -19,7 +20,10 @@ class Protocol:
 
         :param protocol_name: name of the protocol
         """
-        if protocol_name in c.transport_protocols:
+        if protocol_name in c.layer_3_protocols:
+            module = importlib.import_module(f"parsers.protocols.Network")
+            cls = getattr(module, "Network")
+        elif protocol_name in c.layer_4_protocols:
             module = importlib.import_module(f"parsers.protocols.Transport")
             cls = getattr(module, "Transport")
         else:
