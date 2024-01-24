@@ -9,8 +9,15 @@ class Protocol:
     Default Protocol parser.
     """
 
-    layer_3_protocols = ["ipv4", "ipv6"]
-    layer_4_protocols = ["tcp", "udp"]
+    # Mapping between supported MUD protocols
+    # and corresponding protocol parsers
+    protocols = {
+        "ipv4": "Network",
+        "ipv6": "Network",
+        "tcp": "Transport",
+        "udp": "Transport",
+        "icmp": "icmp"
+    }
 
 
     @classmethod
@@ -19,17 +26,16 @@ class Protocol:
         Initialize the protocol parser.
 
         :param protocol_name: name of the protocol
+        :return: protocol parser object
+        :raises ValueError: unsupported protocol
         """
-        if protocol_name in c.layer_3_protocols:
-            module = importlib.import_module(f"parsers.protocols.Network")
-            cls = getattr(module, "Network")
-        elif protocol_name in c.layer_4_protocols:
-            module = importlib.import_module(f"parsers.protocols.Transport")
-            cls = getattr(module, "Transport")
+        module_name = c.protocols.get(protocol_name, None)
+        if module_name is not None:
+            module = importlib.import_module(f"parsers.protocols.{module_name}")
+            cls = getattr(module, module_name)
+            return cls(protocol_name)
         else:
-            module = importlib.import_module(f"parsers.protocols.{protocol_name}")    
-            cls = getattr(module, protocol_name)
-        return cls(protocol_name)
+            raise ValueError(f"Unsupported protocol '{protocol_name}'")
     
 
     def __init__(self, protocol_name: str) -> None:

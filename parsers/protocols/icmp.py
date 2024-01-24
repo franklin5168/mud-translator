@@ -8,8 +8,46 @@ class icmp(Protocol):
     ICMP protocol parser.
     """
 
-    # Protocol name
-    name = "icmp"
+    # Supported fields
+    fields = [
+        "type",
+        "code"
+    ]
+
+    # ICMP opcode to name mapping
+    icmp_codes = {
+        0: "echo-reply",
+        3: "destination-unreachable",
+        4: "source-quench",
+        5: "redirect",
+        8: "echo-request",
+        11: "time-exceeded",
+        12: "parameter-problem",
+        13: "timestamp-request",
+        14: "timestamp-reply",
+        15: "information-request",
+        16: "information-reply",
+        17: "address-mask-request",
+        18: "address-mask-reply"
+    }
+    
+
+    def parse_type(self, opcode: int) -> str:
+        """
+        Parse the ICMP type match.
+
+        :param opcode: ICMP type opcode match
+        :return: string of ICMP type match for the YAML profile
+        :raises ValueError: if the given ICMP opcode is invalid
+        """
+        icmp_type = self.icmp_codes.get(opcode, None)
+
+        # Verify ICMP code
+        if icmp_type is None:
+            raise ValueError(f"Invalid ICMP opcode '{opcode}'")
+        
+        # ICMP code is valid
+        return icmp_type
 
 
     def parse(self, matches: dict) -> dict:
@@ -19,4 +57,13 @@ class icmp(Protocol):
         :param matches: dict of protocol matches read from the MUD file
         :return: dict of protocol matches for the YAML profile
         """
-        pass
+        # Initialize result dict
+        proto_dict = {}
+
+        # Parse fields
+        for mud_field in self.fields:
+            type_match = matches.get(mud_field, None)
+            if type_match is not None:
+                proto_dict["type"] = self.parse_type(type_match)
+
+        return proto_dict

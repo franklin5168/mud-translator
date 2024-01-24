@@ -58,8 +58,7 @@ class Network(Protocol):
         :raises ValueError: if the protocol matches are invalid
         """
         # Initialize result dict
-        result_dict = {self.name: {}}
-        proto_dict = result_dict[self.name]
+        proto_dict = {}
 
         # Parse fields
         for mud_field, yaml_field in self.fields.items():
@@ -67,5 +66,5 @@ class Network(Protocol):
             if net_match is not None:
                 proto_dict[yaml_field] = self.parse_network(mud_field, net_match)
 
-        return result_dict
+        return proto_dict
 

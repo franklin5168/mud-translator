@@ -17,10 +17,10 @@ class Transport(Protocol):
 
     # Supported operators on port numbers
     operators = {
-        "lte": "<= ",  # less than or equal to
-        "gte": ">= ",  # greater than or equal to
-        "eq":  "",    # equal to
-        "neq": "!= "   # not equal to
+        "lte": "<=",  # less than or equal to
+        "gte": ">=",  # greater than or equal to
+        "eq":  "",     # equal to
+        "neq": "!="   # not equal to
     }
 
 
@@ -42,7 +42,10 @@ class Transport(Protocol):
             raise ValueError(f"Invalid port number '{port}' for source port")
         
         # Port match is valid
-        return f"{self.operators[op]}{port}"
+        if op == "eq":
+            return port
+        else:
+            return f"{self.operators[op]} {port}"
 
 
     def parse(self, matches: dict) -> dict:
@@ -54,8 +57,7 @@ class Transport(Protocol):
         :raises ValueError: if the protocol matches are invalid
         """
         # Initialize result dict
-        result_dict = {self.name: {}}
-        proto_dict = result_dict[self.name]
+        proto_dict = {}
 
         # Parse source port
         src_port_match = matches.get("source-port", None)
@@ -69,5 +71,5 @@ class Transport(Protocol):
 
         # TODO: direction-initiated
 
-        return result_dict
+        return proto_dict
 
