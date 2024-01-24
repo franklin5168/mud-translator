@@ -50,13 +50,14 @@ class Network(Protocol):
         return str(network_match)
 
 
-    def parse(self, matches: dict, direction: Direction, is_local_network: bool) -> dict:
+    def parse(self, matches: dict, direction: Direction, is_local_network: bool, direction_initiated: Direction) -> dict:
         """
         Parse the protocol matches.
 
         :param matches: dict of protocol matches read from the MUD file
         :param direction: direction of the traffic (FROM or TO)
         :param is_local_network: whether the traffic is within the local network
+        :param direction_initiated: direction of initiation of the connection (FROM or TO)
         :return: dict of protocol matches for the YAML profile
         :raises NotImplementedError: concrete protocol subclass must implement the parse method
         """
@@ -75,6 +76,18 @@ class Network(Protocol):
                 proto_dict["dst"] = "local"
             elif direction == Direction.TO:
                 proto_dict["src"] = "local"
+
+        # If direction and direction initiated are different,
+        # swap source and destination addresses
+        if direction_initiated is not None and direction != direction_initiated:
+            src = proto_dict.get("src", None)
+            dst = proto_dict.get("dst", None)
+            if src is not None:
+                proto_dict["dst"] = src
+                del proto_dict["src"]
+            if dst is not None:
+                proto_dict["src"] = dst
+                del proto_dict["dst"]
 
         return proto_dict
 

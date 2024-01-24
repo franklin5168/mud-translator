@@ -19,6 +19,7 @@ class MudParser:
     ACL  = "ietf-access-control-list:access-lists"
     FROM = "from-device-policy"
     TO   = "to-device-policy"
+    DIRECTION_INIT = "ietf-mud:direction-initiated"
     supported_protocols = [
         "ipv4",
         "ipv6",
@@ -157,17 +158,24 @@ class MudParser:
                 # Local network source or destination IP address
                 is_local_network = bool(matches.get(self.MUD, {}).get("local-networks", None))
 
-                # TODO
-                # If TCP field direction-initiated is present and is "to-device"
+                # Direction initiated
+                direction_initiated = matches.get("tcp", {}).get(self.DIRECTION_INIT, None)
+                if direction_initiated is not None:
+                    direction_initiated = Direction(direction_initiated)
 
                 # Parse protocol if supported
                 for protocol_name in self.supported_protocols:
                     if protocol_name in matches:
                         protocol = Protocol.init_protocol(protocol_name)
-                        protocol_matches = protocol.parse(matches[protocol_name], direction, is_local_network)
+                        protocol_matches = protocol.parse(matches[protocol_name], direction, is_local_network, direction_initiated)
                         if protocol_matches:
                             protocols[protocol.name] = protocol_matches
                 
+                # Policy metadata
+                if direction_initiated is not None:
+                    policy["bidirectional"] = True
+                    policy["stats"] = {"rate": 0}
+
                 # Add policy to YAML data
                 yaml_data["single-policies"][ace["name"]] = policy
 

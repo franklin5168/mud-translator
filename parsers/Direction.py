@@ -6,5 +6,5 @@ class Direction(Enum):
         """
         Enumerate the different types of traffic directions.
         """
-        FROM = "from"
-        TO   = "to"
+        FROM = "from-device"
+        TO   = "to-device"

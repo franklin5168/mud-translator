@@ -49,13 +49,14 @@ class Transport(Protocol):
             return f"{self.operators[op]} {port}"
 
 
-    def parse(self, matches: dict, direction: Direction, is_local_network: bool) -> dict:
+    def parse(self, matches: dict, direction: Direction, is_local_network: bool, direction_initiated: Direction) -> dict:
         """
         Parse the protocol matches.
 
         :param matches: dict of protocol matches read from the MUD file
         :param direction: direction of the traffic (FROM or TO)
         :param is_local_network: whether the traffic is within the local network
+        :param direction_initiated: direction of initiation of the connection (FROM or TO)
         :return: dict of protocol matches for the YAML profile
         :raises NotImplementedError: concrete protocol subclass must implement the parse method
         """
