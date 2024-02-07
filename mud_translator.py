@@ -50,4 +50,5 @@ if __name__ == "__main__":
 
     # Parse input file
     mud_parser = MudParser.init_parser(args)
-    mud_parser.parse()
+    d = mud_parser.read_input()
+    #mud_parser.parse()
